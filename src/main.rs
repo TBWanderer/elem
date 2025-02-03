@@ -63,7 +63,7 @@ fn main() {
             Value::Pair(Box::new((Value::Number(3), Value::Nil))),
         ))),
         Value::Pair(Box::new((Value::Nil, Value::Number(1)))),
-        Value::Pair(Box::new((Value::Number(228), Value::Nil))),
+        Value::Pair(Box::new((Value::Name("aboba".to_string()), Value::Nil))),
     ];
 
     for value in values {

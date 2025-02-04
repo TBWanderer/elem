@@ -1,9 +1,49 @@
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
+use std::fmt;
+use std::rc::Rc;
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub enum Value {
     Nil,
     Number(i128),
     Name(String),
-    Pair(Box<(Value, Value)>),
+    Pair(Rc<Value>, Rc<Value>),
+}
+
+pub trait List {
+    fn is_list(&self) -> bool;
+    fn get(&self, index: usize) -> &Value;
+    fn len(&self) -> usize;
+}
+
+impl List for Value {
+    fn is_list(&self) -> bool {
+        let mut current = self;
+        while let Value::Pair(_, cdr) = current {
+            current = cdr;
+        }
+        matches!(current, Value::Nil)
+    }
+
+    fn get(&self, index: usize) -> &Value {
+        if self.is_list() {
+            let mut current = self;
+            let mut i = 0;
+
+            while let Value::Pair(car, cdr) = current {
+                if i == index {
+                    return car;
+                }
+                current = cdr;
+                i += 1;
+            }
+        }
+        &Value::Nil
+    }
+
+    fn len(&self) -> usize {
+        let v: Vec<Value> = self.into();
+        v.len()
+    }
 }
 
 pub trait Show {
@@ -12,112 +52,121 @@ pub trait Show {
 
 impl Show for Value {
     fn show(&self) -> String {
-        match self {
-            Value::Nil => String::from("()"),
-            Value::Number(number) => format!("{}", number),
-            Value::Name(name) => format!("{}", name),
-            Value::Pair(pair) => {
-                let mut result = String::from("(");
-                result.push_str(&pair.0.show());
-                let mut current = &pair.1;
+        format!("{}", self)
+    }
+}
 
-                while let Value::Pair(next_pair) = current {
-                    result.push(' ');
-                    result.push_str(&next_pair.0.show());
-                    current = &next_pair.1;
+impl fmt::Display for Value {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Value::Nil => write!(f, "()"),
+            Value::Number(n) => write!(f, "{}", n),
+            Value::Name(name) => write!(f, "{}", name),
+            Value::Pair(car, cdr) => {
+                write!(f, "(")?;
+                write!(f, "{}", car)?;
+
+                let mut current = cdr;
+                while let Value::Pair(next_car, next_cdr) = current.as_ref() {
+                    write!(f, " {}", next_car)?;
+                    current = next_cdr;
                 }
 
-                match current {
-                    Value::Nil => result.push(')'),
-                    _ => {
-                        result.push_str(" . ");
-                        result.push_str(&current.show());
-                        result.push(')');
-                    }
+                match current.as_ref() {
+                    Value::Nil => write!(f, ")"),
+                    _ => write!(f, " . {})", current),
                 }
-
-                result
             }
         }
     }
 }
 
-impl std::fmt::Display for Value {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.show())
+impl From<i128> for Value {
+    fn from(n: i128) -> Self {
+        Value::Number(n)
     }
 }
 
-impl std::ops::Add for Value {
-    type Output = Value;
-    fn add(self, rhs: Self) -> Self::Output {
-        match self {
-            Value::Number(a) => {
-                let Value::Number(b) = rhs else { panic!() };
+impl From<&str> for Value {
+    fn from(s: &str) -> Self {
+        Value::Name(s.to_string())
+    }
+}
 
-                return Value::Number(a + b);
-            }
-            _ => panic!(),
+impl From<String> for Value {
+    fn from(s: String) -> Self {
+        Value::Name(s)
+    }
+}
+
+impl From<&Value> for Value {
+    fn from(v: &Value) -> Self {
+        v.clone()
+    }
+}
+
+impl From<Value> for Vec<Value> {
+    fn from(value: Value) -> Self {
+        let mut elements = Vec::new();
+        let mut current = value;
+
+        while let Value::Pair(car, cdr) = current {
+            elements.push((*car).clone());
+            current = (*cdr).clone();
         }
+
+        elements
     }
 }
 
-impl std::ops::AddAssign for Value {
-    fn add_assign(&mut self, rhs: Self) {
-        match self {
-            Value::Number(a) => {
-                let Value::Number(b) = rhs else { panic!() };
+impl From<&Value> for Vec<Value> {
+    fn from(value: &Value) -> Self {
+        let mut elements = Vec::new();
+        let mut current = value;
 
-                *self = Value::Number(*a + b);
-            }
-            _ => panic!(),
+        while let Value::Pair(car, cdr) = current {
+            elements.push((**car).clone());
+            current = &**cdr;
         }
+
+        elements
     }
 }
 
-impl std::ops::Mul for Value {
-    type Output = Value;
-    fn mul(self, rhs: Self) -> Self::Output {
-        match self {
-            Value::Number(a) => {
-                let Value::Number(b) = rhs else { panic!() };
-
-                return Value::Number(a * b);
-            }
-            _ => panic!(),
-        }
-    }
-}
-
-impl std::ops::MulAssign for Value {
-    fn mul_assign(&mut self, rhs: Self) {
-        match self {
-            Value::Number(a) => {
-                let Value::Number(b) = rhs else { panic!() };
-
-                *self = Value::Number(*a * b);
-            }
-            _ => panic!(),
-        }
-    }
-}
-
-pub fn get_two(list: Value) -> (Value, Value) {
-    let save = list.clone();
-
-    let Value::Pair(pair) = list else {
-        panic!("{} is not a list!", list)
+#[macro_export]
+macro_rules! list {
+    () => {
+        Value::Nil
     };
-    let a = pair.0;
-
-    let Value::Pair(pair) = pair.1 else {
-        panic!("{} is not a list!", pair.1)
+    ($elem:expr $(, $rest:expr)*) => {
+        Value::Pair(std::rc::Rc::new($elem.into()), std::rc::Rc::new(list!($($rest),*)))
     };
-    let b = pair.0;
+}
 
-    if pair.1 != Value::Nil {
-        panic!("{} is not a list!", save)
-    }
+#[macro_export]
+macro_rules! num {
+    ($x:expr) => {
+        Value::Number($x)
+    };
+}
 
-    (a, b)
+#[macro_export]
+macro_rules! name {
+    ($x:expr) => {
+        Value::Name($x.to_string())
+    };
+}
+
+#[macro_export]
+macro_rules! nil {
+    () => {
+        Value::Nil
+    };
+}
+
+#[macro_export]
+macro_rules! pair {
+    ($car:expr, $cdr:expr) => {
+        Value::Pair(std::rc::Rc::new($car.into()), std::rc::Rc::new($cdr.into()))
+    };
 }

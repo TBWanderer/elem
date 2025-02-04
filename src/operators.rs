@@ -1,91 +1,107 @@
 use super::value::*;
 
-pub fn ladd(mut list: Value) -> Value {
-    let mut sum = Value::Number(0);
+pub fn ladd(list: Value) -> Value {
+    let mut sum = 0;
+    let v: Vec<Value> = list.into();
 
-    let save = list.clone();
-
-    while let Value::Pair(pair) = &list {
-        sum += pair.0.clone();
-        list = pair.1.clone();
+    for i in v {
+        if let Value::Number(n) = i {
+            sum += n;
+        } else {
+            panic!("Non-number element in list: {}", i);
+        }
     }
 
-    if list != Value::Nil {
-        panic!("{} is not a list!", save)
-    }
-
-    sum
+    Value::Number(sum)
 }
 
-pub fn lmul(mut list: Value) -> Value {
-    let mut res = Value::Number(1);
+pub fn lmul(list: Value) -> Value {
+    let mut res = 1;
+    let v: Vec<Value> = list.into();
 
-    let save = list.clone();
-
-    while let Value::Pair(pair) = &list {
-        res *= pair.0.clone();
-        list = pair.1.clone();
+    for i in v {
+        if let Value::Number(n) = i {
+            res *= n;
+        } else {
+            panic!("Non-number element in list: {}", i);
+        }
     }
 
-    if list != Value::Nil {
-        panic!("{} is not a list!", save)
-    }
-
-    res
+    Value::Number(res)
 }
 
 pub fn leq(list: Value) -> Value {
-    let mut res = Value::Nil;
+    let v: Vec<Value> = list.into();
+    if v.len() != 2 {
+        panic!("Too many arguments!");
+    };
 
-    let (a, b) = get_two(list.clone());
-
-    if a == b {
-        res = Value::Number(1);
+    if v[0] == v[1] {
+        Value::Number(1)
+    } else {
+        Value::Nil
     }
-
-    res
 }
 
 pub fn lgt(list: Value) -> Value {
-    let mut res = Value::Nil;
-
-    let (Value::Number(a), Value::Number(b)) = get_two(list.clone()) else {
-        panic!("{} is not list of 2 numbers!", list)
+    let v: Vec<Value> = list.into();
+    if v.len() != 2 {
+        panic!("Too many arguments!");
     };
 
-    if a > b {
-        res = Value::Number(1);
+    if let (Value::Number(a_num), Value::Number(b_num)) = (&v[0], &v[1]) {
+        if a_num > b_num {
+            Value::Number(1)
+        } else {
+            Value::Nil
+        }
+    } else {
+        panic!("Arguments must be numbers: {} and {}", v[0], v[1])
     }
-
-    res
 }
 
 pub fn llt(list: Value) -> Value {
-    let mut res = Value::Nil;
-
-    let (Value::Number(a), Value::Number(b)) = get_two(list.clone()) else {
-        panic!("{} is not list of 2 numbers!", list)
+    let v: Vec<Value> = list.into();
+    if v.len() != 2 {
+        panic!("Too many arguments!");
     };
 
-    if a < b {
-        res = Value::Number(1);
+    if let (Value::Number(a_num), Value::Number(b_num)) = (&v[0], &v[1]) {
+        if a_num < b_num {
+            Value::Number(1)
+        } else {
+            Value::Nil
+        }
+    } else {
+        panic!("Arguments must be numbers: {} and {}", v[0], v[1])
     }
-
-    res
 }
 
 pub fn ldiv(list: Value) -> Value {
-    let (Value::Number(a), Value::Number(b)) = get_two(list.clone()) else {
-        panic!("{} is not list of 2 numbers!", list)
+    let v: Vec<Value> = list.into();
+    if v.len() != 2 {
+        panic!("Too many arguments!");
     };
 
-    Value::Number(a / b)
+    if let (Value::Number(a_num), Value::Number(b_num)) = (v[0].clone(), v[1].clone()) {
+        if b_num == 0 {
+            panic!("Division by zero");
+        }
+        Value::Number(a_num / b_num)
+    } else {
+        panic!("Arguments must be numbers")
+    }
 }
 
 pub fn lsub(list: Value) -> Value {
-    let (Value::Number(a), Value::Number(b)) = get_two(list.clone()) else {
-        panic!("{} is not list of 2 numbers!", list)
+    let v: Vec<Value> = list.into();
+    if v.len() != 2 {
+        panic!("Too many arguments!");
     };
 
-    Value::Number(a - b)
+    if let (Value::Number(a_num), Value::Number(b_num)) = (v[0].clone(), v[1].clone()) {
+        Value::Number(a_num - b_num)
+    } else {
+        panic!("Arguments must be numbers")
+    }
 }

@@ -46,16 +46,6 @@ impl List for Value {
     }
 }
 
-pub trait Show {
-    fn show(&self) -> String;
-}
-
-impl Show for Value {
-    fn show(&self) -> String {
-        format!("{}", self)
-    }
-}
-
 impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {

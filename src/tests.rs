@@ -1,4 +1,4 @@
-use super::{operators::*, *};
+use super::{conditions::*, operators::*, *};
 
 #[test]
 fn show_test() {
@@ -98,4 +98,48 @@ fn test_lsub() {
 #[should_panic(expected = "Arguments must be numbers")]
 fn test_lsub_invalid() {
     lsub(list![num!(5), name!("x")]);
+}
+
+#[test]
+fn test_lcond_true_case() {
+    let conditions = list![
+        list![nil!(), num!(42)],
+        list![num!(1), num!(99)],
+        list![num!(1), num!(123)]
+    ];
+    assert_eq!(lcond(conditions), num!(99));
+}
+
+#[test]
+fn test_lcond_false_case() {
+    let conditions = list![list![nil!(), num!(42)], list![nil!(), num!(99)]];
+    assert_eq!(lcond(conditions), nil!());
+}
+
+#[test]
+fn test_lcond_empty() {
+    let conditions = list![];
+    assert_eq!(lcond(conditions), nil!());
+}
+
+#[test]
+#[should_panic(expected = "cond state error!")]
+fn test_lcond_invalid_state() {
+    let conditions = list![list![num!(1)]];
+    lcond(conditions);
+}
+
+#[test]
+#[should_panic(expected = "cond syntax error!")]
+fn test_lcond_not_a_list() {
+    lcond(num!(5));
+}
+
+#[test]
+fn test_lcond_evaluated_conditions() {
+    let conditions = list![
+        list![leval(nil!()), num!(42)],
+        list![leval(num!(1)), num!(99)]
+    ];
+    assert_eq!(lcond(conditions), num!(99));
 }

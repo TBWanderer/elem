@@ -21,7 +21,7 @@ pub fn change(mut scopes: Scopes, k: String, v: Value) {
 }
 
 pub fn get(scopes: Scopes, k: String) -> Value {
-    for i in (1..scopes.len()).rev() {
+    for i in (0..scopes.len()).rev() {
         if scopes[i].contains_key(&k) {
             return scopes[i].get(&k).unwrap().clone();
         }

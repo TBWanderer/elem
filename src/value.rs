@@ -54,8 +54,8 @@ impl fmt::Display for Value {
             Value::Nil => write!(f, "()"),
             Value::Number(n) => write!(f, "{}", n),
             Value::Name(name) => write!(f, "{}", name),
-            Value::Function(func) => write!(f, "FUNC"),
-            Value::Macros(macr) => write!(f, "FUNC"),
+            Value::Function(_) => write!(f, "<function>"),
+            Value::Macros(_) => write!(f, "<macros>"),
             Value::Pair(car, cdr) => {
                 write!(f, "(")?;
                 write!(f, "{}", car)?;

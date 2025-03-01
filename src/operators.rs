@@ -155,7 +155,7 @@ pub fn leval(expr: Value, scopes: &mut Scopes) -> Value {
         Value::Macros(_) => expr,
         Value::Function(_) => expr,
         Value::Name(name) => scopes::get(scopes.to_vec(), name),
-        Value::Pair(action, args) => match *action {
+        Value::Pair(action, args) => match leval((*action).clone(), scopes) {
             Value::Macros(macros) => macros((*args).clone(), scopes),
             Value::Function(function) => {
                 if !args.is_list() {

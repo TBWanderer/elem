@@ -34,11 +34,9 @@ pub fn parse(tokens: Vec<&str>) -> Vec<crate::value::Value> {
     use crate::value::Value;
     use crate::*;
     let mut stack: Vec<Value> = vec![];
-    let mut tokens = tokens;
-    tokens.reverse();
 
-    for token in tokens {
-        match token {
+    for token in tokens.iter().rev() {
+        match *token {
             "(" => {
                 let tmp = stack.pop().expect("Stack Error 1");
                 let active = stack.pop().unwrap_or(nil!());

@@ -2,29 +2,37 @@ use super::value::Value;
 use std::collections::HashMap;
 
 pub type Scope = HashMap<String, Value>;
-pub type Scopes = Vec<Scope>;
-
-pub fn new(scopes: &mut Scopes) {
-    scopes.push(Scope::new());
+pub struct Scopes {
+    inner: Vec<Scope>,
 }
 
-pub fn add(scopes: &mut Scopes, scope: Scope) {
-    scopes.push(scope);
-}
-
-pub fn pop(mut scopes: Scopes) {
-    scopes.pop();
-}
-
-pub fn change(mut scopes: Scopes, k: String, v: Value) {
-    scopes.last_mut().unwrap().insert(k, v);
-}
-
-pub fn get(scopes: Scopes, k: String) -> Value {
-    for i in (0..scopes.len()).rev() {
-        if scopes[i].contains_key(&k) {
-            return scopes[i].get(&k).unwrap().clone();
-        }
+impl Scopes {
+    pub fn new() -> Self {
+        Self { inner: vec![] }
     }
-    panic!(r#"Key not exists: "{}""#, k)
+
+    pub fn init_scope(&mut self) {
+        self.inner.push(Scope::new())
+    }
+
+    pub fn add_scope(&mut self, scope: Scope) {
+        self.inner.push(scope);
+    }
+
+    pub fn pop(&mut self) -> Option<Scope> {
+        self.inner.pop()
+    }
+
+    pub fn change(&mut self, k: String, v: Value) {
+        self.inner.last_mut().unwrap().insert(k, v);
+    }
+
+    pub fn get(&mut self, k: String) -> Value {
+        for i in (0..self.inner.len()).rev() {
+            if self.inner[i].contains_key(&k) {
+                return self.inner[i].get(&k).unwrap().clone();
+            }
+        }
+        panic!(r#"Key not exists: "{}""#, k)
+    }
 }

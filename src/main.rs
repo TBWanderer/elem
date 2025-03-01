@@ -11,10 +11,10 @@ fn main() {
     if let Some(path) = matches.get_one::<String>("file") {
         let code = runtime::utils::io::read_file(&path);
         elem_runtime.run(&code);
-    }
-
-    loop {
-        let line = runtime::utils::io::input("lithium@elem >> ");
-        elem_runtime.run(&line);
+    } else {
+        loop {
+            let line = runtime::utils::io::input("lithium@elem >> ");
+            elem_runtime.run(&line);
+        }
     }
 }

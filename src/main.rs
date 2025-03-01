@@ -5,7 +5,7 @@ fn input(prompt: &str) -> String {
     print!("{} {}", "[>]", prompt);
     match io::stdout().flush() {
         Ok(_) => (),
-        Err(e) => panic!(),
+        Err(_) => panic!(),
     };
 
     match io::stdin()
@@ -16,7 +16,7 @@ fn input(prompt: &str) -> String {
         .map(|x| x.trim_end().to_owned())
     {
         Ok(input) => input,
-        Err(err) => {
+        Err(_) => {
             panic!()
         }
     }
@@ -26,7 +26,7 @@ fn main() {
     let mut scopes = init_scopes();
     loop {
         let line = input("lithium@elem >> ");
-        let tokens = tokenize(line.to_string());
+        let tokens = tokenize(&line);
         let values = parse(tokens);
 
         for value in values {

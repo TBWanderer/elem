@@ -8,6 +8,10 @@ pub fn new(scopes: &mut Scopes) {
     scopes.push(Scope::new());
 }
 
+pub fn add(scopes: &mut Scopes, scope: Scope) {
+    scopes.push(scope);
+}
+
 pub fn pop(mut scopes: Scopes) {
     scopes.pop();
 }
@@ -22,5 +26,5 @@ pub fn get(scopes: Scopes, k: String) -> Value {
             return scopes[i].get(&k).unwrap().clone();
         }
     }
-    panic!(r#"Key not exists: "{}"#, k)
+    panic!(r#"Key not exists: "{}""#, k)
 }

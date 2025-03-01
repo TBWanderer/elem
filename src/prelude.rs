@@ -24,5 +24,6 @@ pub fn stdlib() -> Scope {
 pub fn init_scopes() -> Scopes {
     let mut scopes = Scopes::new();
     scopes.add_scope(stdlib());
+    scopes.init_scope();
     scopes
 }

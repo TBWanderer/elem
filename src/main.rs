@@ -1,11 +1,4 @@
-mod conditions;
-mod operators;
-mod scope;
-#[cfg(test)]
-mod tests;
-mod value;
-
-use value::*;
+use elem::list;
 
 fn main() {
     let list = list!["Hello", "world", "!"];

@@ -109,15 +109,14 @@ pub fn lsub(list: Value, _scopes: &mut Scopes) -> Value {
 }
 
 pub fn lset(list: Value, scopes: &mut Scopes) -> Value {
-    use super::scopes;
-
     let v: Vec<Value> = list.into();
     if v.len() != 2 {
         panic!("Not 2 arguments!")
     }
 
     if let Value::Name(k) = &v[0] {
-        scopes::change(scopes.to_vec(), k.to_string(), leval(v[1].clone(), scopes))
+        let v = leval(v[1].clone(), scopes);
+        scopes.change(k.to_string(), v)
     } else {
         panic!("1st arg isn't name type")
     }
@@ -125,14 +124,12 @@ pub fn lset(list: Value, scopes: &mut Scopes) -> Value {
 }
 
 pub fn llet(list: Value, scopes: &mut Scopes) -> Value {
-    use super::scopes;
-
     let args: Vec<Value> = list.into();
     if args.len() != 2 {
         panic!("Not 2 arguments!")
     }
 
-    scopes::new(scopes);
+    scopes.init_scope();
 
     let sets: Vec<Value> = args[0].clone().into();
     for i in 0..sets.len() {
@@ -141,20 +138,19 @@ pub fn llet(list: Value, scopes: &mut Scopes) -> Value {
 
     let result = leval(args[1].clone(), scopes);
 
-    scopes::pop(scopes.to_vec());
+    scopes.pop();
 
     result
 }
 
 pub fn leval(expr: Value, scopes: &mut Scopes) -> Value {
-    use super::scopes;
     use crate::pair;
     match expr {
         Value::Nil => expr,
         Value::Number(_) => expr,
         Value::Macros(_) => expr,
         Value::Function(_) => expr,
-        Value::Name(name) => scopes::get(scopes.to_vec(), name),
+        Value::Name(name) => scopes.get(name),
         Value::Pair(action, args) => match leval((*action).clone(), scopes) {
             Value::Macros(macros) => macros((*args).clone(), scopes),
             Value::Function(function) => {

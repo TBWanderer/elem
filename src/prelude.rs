@@ -17,11 +17,12 @@ pub fn stdlib() -> Scope {
         (String::from("="), Value::Function(leq)),
         (String::from("let"), Value::Macros(llet)),
         (String::from("set"), Value::Macros(lset)),
+        (String::from("cond"), Value::Macros(conditions::lcond)),
     ])
 }
 
 pub fn init_scopes() -> Scopes {
     let mut scopes = Scopes::new();
-    scopes.push(stdlib());
+    scopes.add_scope(stdlib());
     scopes
 }

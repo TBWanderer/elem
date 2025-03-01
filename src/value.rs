@@ -7,6 +7,8 @@ pub enum Value {
     Number(i128),
     Name(String),
     Pair(Rc<Value>, Rc<Value>),
+    Function(fn(Value, &mut super::scopes::Scopes) -> Value),
+    Macros(fn(Value, &mut super::scopes::Scopes) -> Value),
 }
 
 pub trait List {
@@ -52,6 +54,8 @@ impl fmt::Display for Value {
             Value::Nil => write!(f, "()"),
             Value::Number(n) => write!(f, "{}", n),
             Value::Name(name) => write!(f, "{}", name),
+            Value::Function(func) => write!(f, "FUNC"),
+            Value::Macros(macr) => write!(f, "FUNC"),
             Value::Pair(car, cdr) => {
                 write!(f, "(")?;
                 write!(f, "{}", car)?;
@@ -109,6 +113,17 @@ impl From<Value> for Vec<Value> {
     }
 }
 
+impl From<Vec<Value>> for Value {
+    fn from(values: Vec<Value>) -> Self {
+        let mut result = Value::Nil;
+
+        for value in values.into_iter().rev() {
+            result = Value::Pair(Rc::new(value), Rc::new(result));
+        }
+
+        result
+    }
+}
 impl From<&Value> for Vec<Value> {
     fn from(value: &Value) -> Self {
         let mut elements = Vec::new();
@@ -126,37 +141,37 @@ impl From<&Value> for Vec<Value> {
 #[macro_export]
 macro_rules! list {
     () => {
-        Value::Nil
+        $crate::value::Value::Nil
     };
     ($elem:expr $(, $rest:expr)*) => {
-        Value::Pair(std::rc::Rc::new($elem.into()), std::rc::Rc::new(list!($($rest),*)))
+        $crate::value::Value::Pair(std::rc::Rc::new($elem.into()), std::rc::Rc::new(list!($($rest),*)))
     };
 }
 
 #[macro_export]
 macro_rules! num {
     ($x:expr) => {
-        Value::Number($x)
+        $crate::value::Value::Number($x)
     };
 }
 
 #[macro_export]
 macro_rules! name {
     ($x:expr) => {
-        Value::Name($x.to_string())
+        $crate::value::Value::Name($x.to_string())
     };
 }
 
 #[macro_export]
 macro_rules! nil {
     () => {
-        Value::Nil
+        $crate::value::Value::Nil
     };
 }
 
 #[macro_export]
 macro_rules! pair {
     ($car:expr, $cdr:expr) => {
-        Value::Pair(std::rc::Rc::new($car.into()), std::rc::Rc::new($cdr.into()))
+        $crate::value::Value::Pair(std::rc::Rc::new($car.into()), std::rc::Rc::new($cdr.into()))
     };
 }

@@ -1,31 +1,36 @@
-pub fn tokenize(line: String) -> Vec<String> {
-    let mut tokens: Vec<String> = vec![];
-    let mut curr = String::from("");
-    for i in line.chars().into_iter() {
-        match i {
+pub fn tokenize<'a>(line: &'a str) -> Vec<&'a str> {
+    let mut tokens: Vec<&'a str> = vec![];
+    let mut start_idx = 0;
+    let mut curr_idx = 0;
+
+    for (idx, c) in line.char_indices() {
+        curr_idx = idx;
+        match c {
             ' ' => {
-                if !curr.is_empty() {
-                    tokens.push(curr);
-                    curr = String::from("")
+                if start_idx < idx {
+                    tokens.push(&line[start_idx..idx]);
                 }
+                start_idx = idx + 1;
             }
             '(' | ')' => {
-                if !curr.is_empty() {
-                    tokens.push(curr);
-                    curr = String::from("")
+                if start_idx < idx {
+                    tokens.push(&line[start_idx..idx]);
                 }
-                tokens.push(String::from(i))
+                tokens.push(&line[idx..idx + 1]);
+                start_idx = idx + 1;
             }
-            any => {
-                curr += &String::from(any);
-            }
+            _ => {}
         }
+    }
+
+    if start_idx <= curr_idx && start_idx < line.len() {
+        tokens.push(&line[start_idx..]);
     }
 
     tokens
 }
 
-pub fn parse(tokens: Vec<String>) -> Vec<crate::value::Value> {
+pub fn parse(tokens: Vec<&str>) -> Vec<crate::value::Value> {
     use crate::value::Value;
     use crate::*;
     let mut stack: Vec<Value> = vec![];
@@ -33,7 +38,7 @@ pub fn parse(tokens: Vec<String>) -> Vec<crate::value::Value> {
     tokens.reverse();
 
     for token in tokens {
-        match token.as_str() {
+        match token {
             "(" => {
                 let tmp = stack.pop().expect("Stack Error 1");
                 let active = stack.pop().unwrap_or(nil!());
@@ -46,7 +51,7 @@ pub fn parse(tokens: Vec<String>) -> Vec<crate::value::Value> {
                     let active = stack.pop().expect("Stack error 3");
                     stack.push(pair!(tmp, active))
                 } else {
-                    let tmp = Value::Name(token);
+                    let tmp = Value::Name(token.to_string());
                     let active = stack.pop().expect("Stack error 4");
                     stack.push(pair!(tmp, active))
                 }

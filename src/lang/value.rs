@@ -141,37 +141,40 @@ impl From<&Value> for Vec<Value> {
 #[macro_export]
 macro_rules! list {
     () => {
-        $crate::value::Value::Nil
+        $crate::lang::value::Value::Nil
     };
     ($elem:expr $(, $rest:expr)*) => {
-        $crate::value::Value::Pair(std::rc::Rc::new($elem.into()), std::rc::Rc::new(list!($($rest),*)))
+        $crate::lang::value::Value::Pair(std::rc::Rc::new($elem.into()), std::rc::Rc::new(list!($($rest),*)))
     };
 }
 
 #[macro_export]
 macro_rules! num {
     ($x:expr) => {
-        $crate::value::Value::Number($x)
+        $crate::lang::value::Value::Number($x)
     };
 }
 
 #[macro_export]
 macro_rules! name {
     ($x:expr) => {
-        $crate::value::Value::Name($x.to_string())
+        $crate::lang::value::Value::Name($x.to_string())
     };
 }
 
 #[macro_export]
 macro_rules! nil {
     () => {
-        $crate::value::Value::Nil
+        $crate::lang::value::Value::Nil
     };
 }
 
 #[macro_export]
 macro_rules! pair {
     ($car:expr, $cdr:expr) => {
-        $crate::value::Value::Pair(std::rc::Rc::new($car.into()), std::rc::Rc::new($cdr.into()))
+        $crate::lang::value::Value::Pair(
+            std::rc::Rc::new($car.into()),
+            std::rc::Rc::new($cdr.into()),
+        )
     };
 }

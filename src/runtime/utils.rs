@@ -1,3 +1,25 @@
+pub fn input(prompt: &str) -> String {
+    use std::io::{self, BufRead, Write};
+    print!("{} {}", "[>]", prompt);
+    match io::stdout().flush() {
+        Ok(_) => (),
+        Err(_) => panic!(),
+    };
+
+    match io::stdin()
+        .lock()
+        .lines()
+        .next()
+        .unwrap()
+        .map(|x| x.trim_end().to_owned())
+    {
+        Ok(input) => input,
+        Err(_) => {
+            panic!()
+        }
+    }
+}
+
 pub fn tokenize<'a>(line: &'a str) -> Vec<&'a str> {
     let mut tokens: Vec<&'a str> = vec![];
     let mut start_idx = 0;
@@ -30,8 +52,8 @@ pub fn tokenize<'a>(line: &'a str) -> Vec<&'a str> {
     tokens
 }
 
-pub fn parse(tokens: Vec<&str>) -> Vec<crate::value::Value> {
-    use crate::value::Value;
+pub fn parse(tokens: Vec<&str>) -> Vec<crate::lang::value::Value> {
+    use crate::lang::value::Value;
     use crate::*;
     let mut stack: Vec<Value> = vec![];
 

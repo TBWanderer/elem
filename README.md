@@ -1,2 +1,4 @@
-# elem
-Experimental Language Elementary Made
+# elem lithium
+## Experimental Language Elementary Made
+### Info
+ - *Version*: **Lithium**

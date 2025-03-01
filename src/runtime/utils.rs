@@ -1,25 +1,43 @@
-pub fn input(prompt: &str) -> String {
-    use std::io::{self, BufRead, Write};
-    print!("{} {}", "[>]", prompt);
-    match io::stdout().flush() {
-        Ok(_) => (),
-        Err(_) => panic!(),
-    };
+pub mod io {
+    pub fn input(prompt: &str) -> String {
+        use std::io::{self, BufRead, Write};
+        print!("{} {}", "[>]", prompt);
+        match io::stdout().flush() {
+            Ok(_) => (),
+            Err(_) => panic!(),
+        };
 
-    match io::stdin()
-        .lock()
-        .lines()
-        .next()
-        .unwrap()
-        .map(|x| x.trim_end().to_owned())
-    {
-        Ok(input) => input,
-        Err(_) => {
-            panic!()
+        match io::stdin()
+            .lock()
+            .lines()
+            .next()
+            .unwrap()
+            .map(|x| x.trim_end().to_owned())
+        {
+            Ok(input) => input,
+            Err(_) => {
+                panic!()
+            }
+        }
+    }
+
+    pub fn read_file(path: &str) -> String {
+        use std::path::PathBuf;
+        let path = PathBuf::from(path);
+        if path.exists() {
+            if !path.is_dir() {
+                let data = std::fs::read_to_string(&path)
+                    .expect(&format!("Couldn't read file: {}", path.to_str().unwrap()));
+                let data = data.replace("\n", " ");
+                data
+            } else {
+                panic!("{} is a directory, not file", path.to_str().unwrap())
+            }
+        } else {
+            panic!("File not found: {}", path.to_str().unwrap())
         }
     }
 }
-
 pub fn tokenize<'a>(line: &'a str) -> Vec<&'a str> {
     let mut tokens: Vec<&'a str> = vec![];
     let mut start_idx = 0;
@@ -41,6 +59,7 @@ pub fn tokenize<'a>(line: &'a str) -> Vec<&'a str> {
                 tokens.push(&line[idx..idx + 1]);
                 start_idx = idx + 1;
             }
+            ';' => break,
             _ => {}
         }
     }

@@ -28,8 +28,14 @@ pub mod io {
             if !path.is_dir() {
                 let data = std::fs::read_to_string(&path)
                     .expect(&format!("Couldn't read file: {}", path.to_str().unwrap()));
-                let data = data.replace("\n", " ");
-                data
+
+                let processed_data = data
+                    .lines()
+                    .map(|line| line.split(';').collect::<Vec<&str>>()[0].trim())
+                    .collect::<Vec<&str>>()
+                    .join(" ");
+
+                processed_data
             } else {
                 panic!("{} is a directory, not file", path.to_str().unwrap())
             }

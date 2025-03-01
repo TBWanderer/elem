@@ -15,8 +15,8 @@ pub fn stdlib() -> Scope {
         (String::from(">"), Value::Function(lgt)),
         (String::from("<"), Value::Function(llt)),
         (String::from("="), Value::Function(leq)),
-        (String::from("let"), Value::Function(llet)),
-        (String::from("set"), Value::Function(lset)),
+        (String::from("let"), Value::Macros(llet)),
+        (String::from("set"), Value::Macros(lset)),
     ])
 }
 

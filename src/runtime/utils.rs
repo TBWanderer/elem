@@ -48,25 +48,41 @@ pub fn tokenize<'a>(line: &'a str) -> Vec<&'a str> {
     let mut tokens: Vec<&'a str> = vec![];
     let mut start_idx = 0;
     let mut curr_idx = 0;
+    let mut is_string = false;
 
     for (idx, c) in line.char_indices() {
         curr_idx = idx;
-        match c {
-            ' ' => {
+        if is_string {
+            if c == '"' {
                 if start_idx < idx {
-                    tokens.push(&line[start_idx..idx]);
+                    tokens.push(&line[start_idx..idx + 1]);
                 }
                 start_idx = idx + 1;
+                is_string = false;
             }
-            '(' | ')' => {
-                if start_idx < idx {
-                    tokens.push(&line[start_idx..idx]);
+        } else {
+            match c {
+                '"' => {
+                    start_idx = idx;
+                    is_string = true;
                 }
-                tokens.push(&line[idx..idx + 1]);
-                start_idx = idx + 1;
+                ' ' => {
+                    if start_idx < idx {
+                        tokens.push(&line[start_idx..idx]);
+                    }
+                    start_idx = idx + 1;
+                }
+                '(' | ')' => {
+                    if start_idx < idx {
+                        tokens.push(&line[start_idx..idx]);
+                    }
+                    tokens.push(&line[idx..idx + 1]);
+                    start_idx = idx + 1;
+                }
+                ';' => break,
+
+                _ => {}
             }
-            ';' => break,
-            _ => {}
         }
     }
 
@@ -85,7 +101,7 @@ pub fn parse(tokens: Vec<&str>) -> Vec<crate::lang::value::Value> {
     for token in tokens.iter().rev() {
         match *token {
             "(" => {
-                let tmp = stack.pop().expect("Stack Error 1");
+                let tmp = stack.pop().expect("Stack Error");
                 let active = stack.pop().unwrap_or(nil!());
                 stack.push(pair!(tmp, active))
             }
@@ -93,11 +109,21 @@ pub fn parse(tokens: Vec<&str>) -> Vec<crate::lang::value::Value> {
             _ => {
                 if token.parse::<i128>().is_ok() {
                     let tmp = Value::Number(token.parse().unwrap());
-                    let active = stack.pop().expect("Stack error 3");
+                    let active = stack
+                        .pop()
+                        .expect("Syntax error! Couldn't add number to stack");
+                    stack.push(pair!(tmp, active))
+                } else if token.chars().next().unwrap() == '"' {
+                    let tmp = Value::String(token[1..token.len() - 1].to_string());
+                    let active = stack
+                        .pop()
+                        .expect("Syntax error! Couldn't add string to stack");
                     stack.push(pair!(tmp, active))
                 } else {
                     let tmp = Value::Name(token.to_string());
-                    let active = stack.pop().expect("Stack error 4");
+                    let active = stack
+                        .pop()
+                        .expect("Syntax error! Couldn't add name to stack");
                     stack.push(pair!(tmp, active))
                 }
             }

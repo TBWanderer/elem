@@ -8,8 +8,8 @@ pub enum Value {
     String(String),
     Name(String),
     Pair(Rc<Value>, Rc<Value>),
-    Function(fn(Value, &mut super::scopes::Scopes) -> Value),
-    Macros(fn(Value, &mut super::scopes::Scopes) -> Value),
+    Function(Rc<fn(Value, &mut super::scopes::Scopes) -> Value>),
+    Macros(Rc<fn(Value, &mut super::scopes::Scopes) -> Value>),
 }
 
 pub trait List {

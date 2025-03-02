@@ -3,11 +3,12 @@ mod macroses;
 
 use super::Library;
 use crate::lang::value::Value;
+use std::rc::Rc;
 
 pub fn init() -> Library {
     let key = |name| String::from(name);
-    let fun = |function| Value::Function(function);
-    let mac = |macros| Value::Macros(macros);
+    let fun = |function| Value::Function(Rc::new(function));
+    let mac = |macros| Value::Macros(Rc::new(macros));
     Library::from([
         (key("+"), fun(functions::ladd)),
         (key("-"), fun(functions::lsub)),
@@ -17,6 +18,7 @@ pub fn init() -> Library {
         (key("<"), fun(functions::llt)),
         (key("="), fun(functions::leq)),
         (key("load"), fun(functions::lload)),
+        (key("lambda"), mac(macroses::llambda)),
         (key("set"), mac(macroses::lset)),
         (key("let"), mac(macroses::llet)),
         (key("cond"), mac(macroses::lcond)),

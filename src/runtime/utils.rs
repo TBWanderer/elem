@@ -21,9 +21,8 @@ pub mod io {
         }
     }
 
-    pub fn read_file(path: &str) -> String {
-        use std::path::PathBuf;
-        let path = PathBuf::from(path);
+    pub fn read_file(path: &dyn AsRef<std::path::Path>) -> String {
+        let path = path.as_ref();
         if path.exists() {
             if !path.is_dir() {
                 let data = std::fs::read_to_string(&path)

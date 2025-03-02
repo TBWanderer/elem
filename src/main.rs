@@ -1,5 +1,5 @@
 use clap::{arg, command};
-use elem::runtime;
+use lithium::runtime;
 
 fn main() {
     let matches = command!()

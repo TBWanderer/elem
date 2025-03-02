@@ -105,3 +105,17 @@ pub fn lsub(args: Value, _scopes: &mut Scopes) -> Value {
         panic!("Arguments must be numbers")
     }
 }
+
+pub fn lload(args: Value, scopes: &mut Scopes) -> Value {
+    if args.len() != 1 {
+        panic!("Incorrect count of args for load func")
+    } else if let Value::String(module_path) = args.get(0) {
+        let module_code = crate::runtime::utils::io::read_file(module_path);
+        scopes.init_scope();
+        crate::runtime::utils::run_code(module_code, scopes);
+    } else {
+        panic!("Incorrect type of argument! It should be String")
+    }
+
+    crate::nil!()
+}

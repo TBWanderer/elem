@@ -16,6 +16,7 @@ pub fn init() -> Library {
         (key(">"), fun(functions::lgt)),
         (key("<"), fun(functions::llt)),
         (key("="), fun(functions::leq)),
+        (key("load"), fun(functions::lload)),
         (key("set"), mac(macroses::lset)),
         (key("let"), mac(macroses::llet)),
         (key("cond"), mac(macroses::lcond)),

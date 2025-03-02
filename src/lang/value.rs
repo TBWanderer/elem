@@ -5,6 +5,7 @@ use std::rc::Rc;
 pub enum Value {
     Nil,
     Number(i128),
+    String(String),
     Name(String),
     Pair(Rc<Value>, Rc<Value>),
     Function(fn(Value, &mut super::scopes::Scopes) -> Value),
@@ -53,7 +54,8 @@ impl fmt::Display for Value {
         match self {
             Value::Nil => write!(f, "()"),
             Value::Number(n) => write!(f, "{}", n),
-            Value::Name(name) => write!(f, "{}", name),
+            Value::String(string) => write!(f, r#""{}""#, string),
+            Value::Name(name) => write!(f, "<{}>", name),
             Value::Function(_) => write!(f, "<function>"),
             Value::Macros(_) => write!(f, "<macros>"),
             Value::Pair(car, cdr) => {
@@ -71,6 +73,19 @@ impl fmt::Display for Value {
                     _ => write!(f, " . {})", current),
                 }
             }
+        }
+    }
+}
+
+pub trait Show {
+    fn show(&self) -> String;
+}
+
+impl Show for Value {
+    fn show(&self) -> String {
+        match self {
+            Value::String(string) => string.to_string(),
+            other => format!("{}", other),
         }
     }
 }

@@ -8,6 +8,7 @@ pub fn leval(expr: value::Value, scopes: &mut scopes::Scopes) -> value::Value {
     match expr {
         value::Value::Nil => expr,
         value::Value::Number(_) => expr,
+        value::Value::String(_) => expr,
         value::Value::Macros(_) => expr,
         value::Value::Function(_) => expr,
         value::Value::Name(name) => scopes.get(name),

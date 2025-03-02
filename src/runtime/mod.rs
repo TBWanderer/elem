@@ -17,11 +17,6 @@ impl Runtime {
     }
 
     pub fn run(&mut self, line: &str) {
-        let tokens = utils::tokenize(line);
-        let values = utils::parse(tokens);
-
-        for value in values {
-            crate::lang::leval(value, &mut self.scopes);
-        }
+        utils::run_code(line.to_string(), &mut self.scopes);
     }
 }

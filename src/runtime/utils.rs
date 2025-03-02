@@ -44,62 +44,88 @@ pub mod io {
         }
     }
 }
-pub fn tokenize<'a>(line: &'a str) -> Vec<&'a str> {
-    let mut tokens: Vec<&'a str> = vec![];
-    let mut start_idx = 0;
-    let mut curr_idx = 0;
-    let mut is_string = false;
 
-    for (idx, c) in line.char_indices() {
-        curr_idx = idx;
+pub fn tokenize<'a>(line: &'a str) -> Vec<String> {
+    let mut tokens: Vec<String> = vec![];
+    let mut current_token = String::new();
+    let mut is_string = false;
+    let mut is_escaped = false;
+
+    for c in line.chars() {
         if is_string {
-            if c == '"' {
-                if start_idx < idx {
-                    tokens.push(&line[start_idx..idx + 1]);
+            if is_escaped {
+                match c {
+                    'n' => current_token.push_str("\n"),
+                    't' => current_token.push_str("\t"),
+                    'r' => current_token.push_str("\r"),
+                    '\\' => current_token.push_str("\\"),
+                    '"' => current_token.push_str("\""),
+                    _ => {
+                        current_token.push('\\');
+                        current_token.push(c);
+                    }
                 }
-                start_idx = idx + 1;
+                is_escaped = false;
+            } else if c == '\\' {
+                is_escaped = true;
+            } else if c == '"' {
+                current_token.push(c);
+                tokens.push(current_token);
+                current_token = String::new();
                 is_string = false;
+            } else {
+                current_token.push(c);
             }
         } else {
             match c {
                 '"' => {
-                    start_idx = idx;
+                    if !current_token.is_empty() {
+                        tokens.push(current_token);
+                        current_token = String::new();
+                    }
+                    current_token.push(c);
                     is_string = true;
                 }
                 ' ' => {
-                    if start_idx < idx {
-                        tokens.push(&line[start_idx..idx]);
+                    if !current_token.is_empty() {
+                        tokens.push(current_token);
+                        current_token = String::new();
                     }
-                    start_idx = idx + 1;
                 }
                 '(' | ')' => {
-                    if start_idx < idx {
-                        tokens.push(&line[start_idx..idx]);
+                    if !current_token.is_empty() {
+                        tokens.push(current_token);
+                        current_token = String::new();
                     }
-                    tokens.push(&line[idx..idx + 1]);
-                    start_idx = idx + 1;
+                    tokens.push(c.to_string());
                 }
-                ';' => break,
-
-                _ => {}
+                ';' => {
+                    if !current_token.is_empty() {
+                        tokens.push(current_token);
+                    }
+                    return tokens;
+                }
+                _ => {
+                    current_token.push(c);
+                }
             }
         }
     }
 
-    if start_idx <= curr_idx && start_idx < line.len() {
-        tokens.push(&line[start_idx..]);
+    if !current_token.is_empty() {
+        tokens.push(current_token);
     }
 
     tokens
 }
 
-pub fn parse(tokens: Vec<&str>) -> Vec<crate::lang::value::Value> {
+pub fn parse(tokens: Vec<String>) -> Vec<crate::lang::value::Value> {
     use crate::lang::value::Value;
     use crate::*;
     let mut stack: Vec<Value> = vec![];
 
     for token in tokens.iter().rev() {
-        match *token {
+        match token.as_str() {
             "(" => {
                 let tmp = stack.pop().expect("Stack Error");
                 let active = stack.pop().unwrap_or(nil!());
@@ -131,4 +157,13 @@ pub fn parse(tokens: Vec<&str>) -> Vec<crate::lang::value::Value> {
     }
 
     stack.last().expect("Stack error").into()
+}
+
+pub fn run_code(code: String, scopes: &mut crate::lang::scopes::Scopes) {
+    let tokens = tokenize(&code);
+    let values = parse(tokens);
+
+    for value in values {
+        crate::lang::leval(value, scopes);
+    }
 }

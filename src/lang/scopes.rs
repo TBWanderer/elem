@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 pub type Scope = HashMap<String, Value>;
 pub struct Scopes {
-    inner: Vec<Scope>,
+    pub inner: Vec<Scope>,
 }
 
 impl Scopes {
@@ -33,6 +33,16 @@ impl Scopes {
                 return self.inner[i].get(&k).unwrap().clone();
             }
         }
-        panic!(r#"Key not exists: "{}""#, k)
+        crate::nil!()
+    }
+
+    pub fn exists(&mut self, k: String) -> bool {
+        for i in (0..self.inner.len()).rev() {
+            if self.inner[i].contains_key(&k) {
+                return true;
+            }
+        }
+
+        false
     }
 }

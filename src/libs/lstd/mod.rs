@@ -7,20 +7,20 @@ use std::rc::Rc;
 
 pub fn init() -> Library {
     let key = |name| String::from(name);
-    let fun = |function| Value::Function(Rc::new(function));
-    let mac = |macros| Value::Macros(Rc::new(macros));
+    let fun = |function| Value::Function(function);
+    let mac = |macros| Value::Macros(macros);
     Library::from([
-        (key("+"), fun(functions::ladd)),
-        (key("-"), fun(functions::lsub)),
-        (key("*"), fun(functions::lmul)),
-        (key("/"), fun(functions::ldiv)),
-        (key(">"), fun(functions::lgt)),
-        (key("<"), fun(functions::llt)),
-        (key("="), fun(functions::leq)),
-        (key("load"), fun(functions::lload)),
-        (key("lambda"), mac(macroses::llambda)),
-        (key("set"), mac(macroses::lset)),
-        (key("let"), mac(macroses::llet)),
-        (key("cond"), mac(macroses::lcond)),
+        (key("+"), fun(Rc::new(functions::ladd))),
+        (key("-"), fun(Rc::new(functions::lsub))),
+        (key("*"), fun(Rc::new(functions::lmul))),
+        (key("/"), fun(Rc::new(functions::ldiv))),
+        (key(">"), fun(Rc::new(functions::lgt))),
+        (key("<"), fun(Rc::new(functions::llt))),
+        (key("="), fun(Rc::new(functions::leq))),
+        (key("load"), fun(Rc::new(functions::lload))),
+        (key("lambda"), mac(Rc::new(macroses::llambda))),
+        (key("set"), mac(Rc::new(macroses::lset))),
+        (key("let"), mac(Rc::new(macroses::llet))),
+        (key("cond"), mac(Rc::new(macroses::lcond))),
     ])
 }

@@ -57,7 +57,7 @@ pub fn lcond(states: Value, scopes: &mut Scopes) -> Value {
     Value::Nil
 }
 
-pub fn llambda(list: Value, scopes: &mut Scopes) -> Value {
+pub fn llambda(list: Value, _scopes: &mut Scopes) -> Value {
     use std::rc::Rc;
     let args: Vec<Value> = list.into();
     if args.len() != 2 {

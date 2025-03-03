@@ -1,0 +1,10 @@
+(set a 32)
+(set b 16)
+(set c (+ a b))
+(print (* c a)) 		; printing result of (a+b)*a
+(cond 					; Thereis cond + comment
+	((< a b) (print a))
+	((> a b) (print b))
+)
+(print "Hello \n\tworld!")
+(load "testload.txt")

@@ -1,15 +1,88 @@
+use std::cmp::{Ordering, PartialOrd};
 use std::fmt;
 use std::rc::Rc;
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
+#[derive(Clone)]
 pub enum Value {
     Nil,
     Number(i128),
     String(String),
     Name(String),
     Pair(Rc<Value>, Rc<Value>),
-    Function(Rc<fn(Value, &mut super::scopes::Scopes) -> Value>),
-    Macros(Rc<fn(Value, &mut super::scopes::Scopes) -> Value>),
+    Function(Rc<dyn Fn(Value, &mut super::scopes::Scopes) -> Value>),
+    Macros(Rc<dyn Fn(Value, &mut super::scopes::Scopes) -> Value>),
+}
+
+impl PartialEq for Value {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Value::Nil, Value::Nil) => true,
+            (Value::Number(a), Value::Number(b)) => a == b,
+            (Value::String(a), Value::String(b)) => a == b,
+            (Value::Name(a), Value::Name(b)) => a == b,
+            (Value::Pair(car1, cdr1), Value::Pair(car2, cdr2)) => car1 == car2 && cdr1 == cdr2,
+            (Value::Function(_), Value::Function(_)) => false,
+            (Value::Macros(_), Value::Macros(_)) => false,
+            _ => false,
+        }
+    }
+}
+
+impl Eq for Value {}
+
+impl PartialOrd for Value {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Value {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match (self, other) {
+            (Value::Nil, Value::Nil) => Ordering::Equal,
+            (Value::Nil, _) => Ordering::Less,
+            (_, Value::Nil) => Ordering::Greater,
+
+            (Value::Number(a), Value::Number(b)) => a.cmp(b),
+            (Value::Number(_), _) => Ordering::Less,
+            (_, Value::Number(_)) => Ordering::Greater,
+
+            (Value::String(a), Value::String(b)) => a.cmp(b),
+            (Value::String(_), _) => Ordering::Less,
+            (_, Value::String(_)) => Ordering::Greater,
+
+            (Value::Name(a), Value::Name(b)) => a.cmp(b),
+            (Value::Name(_), _) => Ordering::Less,
+            (_, Value::Name(_)) => Ordering::Greater,
+
+            (Value::Pair(car1, cdr1), Value::Pair(car2, cdr2)) => match car1.cmp(car2) {
+                Ordering::Equal => cdr1.cmp(cdr2),
+                ord => ord,
+            },
+            (Value::Pair(_, _), _) => Ordering::Less,
+            (_, Value::Pair(_, _)) => Ordering::Greater,
+
+            (Value::Function(_), Value::Function(_)) => Ordering::Equal,
+            (Value::Function(_), _) => Ordering::Less,
+            (_, Value::Function(_)) => Ordering::Greater,
+
+            (Value::Macros(_), Value::Macros(_)) => Ordering::Equal,
+        }
+    }
+}
+
+impl fmt::Debug for Value {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Value::Nil => write!(f, "Nil"),
+            Value::Number(n) => write!(f, "Number({})", n),
+            Value::String(s) => write!(f, "String({:?})", s),
+            Value::Name(n) => write!(f, "Name({:?})", n),
+            Value::Pair(car, cdr) => write!(f, "Pair({:?}, {:?})", car, cdr),
+            Value::Function(_) => write!(f, "Function(...)"),
+            Value::Macros(_) => write!(f, "Macros(...)"),
+        }
+    }
 }
 
 pub trait List {
@@ -89,6 +162,8 @@ impl Show for Value {
         }
     }
 }
+
+// Rest of the implementations remain the same...
 
 impl From<i128> for Value {
     fn from(n: i128) -> Self {

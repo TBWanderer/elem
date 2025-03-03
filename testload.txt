@@ -1,0 +1,3 @@
+(print "Print from other module")
+(set testfunc (lambda (x y) (+ x y)))
+(testfunc 23 52)

@@ -59,7 +59,6 @@ pub fn lcond(states: Value, scopes: &mut Scopes) -> Value {
 
 pub fn llambda(list: Value, scopes: &mut Scopes) -> Value {
     use std::rc::Rc;
-
     let args: Vec<Value> = list.into();
     if args.len() != 2 {
         panic!("Lambda requires exactly 2 arguments: parameters and body!");
@@ -70,7 +69,6 @@ pub fn llambda(list: Value, scopes: &mut Scopes) -> Value {
 
     Value::Function(Rc::new(move |args: Value, eval_scopes: &mut Scopes| {
         eval_scopes.init_scope();
-
         let param_list: Vec<Value> = params.clone().into();
         let arg_list: Vec<Value> = args.into();
 
@@ -87,9 +85,7 @@ pub fn llambda(list: Value, scopes: &mut Scopes) -> Value {
         }
 
         let result = leval(body.clone(), eval_scopes);
-
         eval_scopes.pop();
-
         result
     }))
 }

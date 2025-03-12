@@ -6,11 +6,6 @@ pub fn leval(expr: value::Value, scopes: &mut scopes::Scopes) -> value::Value {
     use value::List;
 
     match expr {
-        value::Value::Nil => expr,
-        value::Value::Number(_) => expr,
-        value::Value::String(_) => expr,
-        value::Value::Macros(_) => expr,
-        value::Value::Function(_) => expr,
         value::Value::Name(name) => scopes.get(name),
         value::Value::Pair(action, args) => match leval((*action).clone(), scopes) {
             value::Value::Macros(macros) => macros((*args).clone(), scopes),
@@ -33,5 +28,6 @@ pub fn leval(expr: value::Value, scopes: &mut scopes::Scopes) -> value::Value {
                 pair!((*action).clone(), (*args).clone())
             ),
         },
+        _ => expr,
     }
 }

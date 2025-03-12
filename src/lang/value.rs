@@ -5,6 +5,7 @@ use std::rc::Rc;
 #[derive(Clone)]
 pub enum Value {
     Nil,
+    Error(String),
     Number(i128),
     String(String),
     Name(String),
@@ -67,6 +68,10 @@ impl Ord for Value {
             (_, Value::Function(_)) => Ordering::Greater,
 
             (Value::Macros(_), Value::Macros(_)) => Ordering::Equal,
+            (Value::Macros(_), _) => Ordering::Less,
+            (_, Value::Macros(_)) => Ordering::Greater,
+
+            (Value::Error(_), Value::Error(_)) => Ordering::Equal,
         }
     }
 }
@@ -75,6 +80,7 @@ impl fmt::Debug for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Value::Nil => write!(f, "Nil"),
+            Value::Error(err) => write!(f, "Error({:?})", err),
             Value::Number(n) => write!(f, "Number({})", n),
             Value::String(s) => write!(f, "String({:?})", s),
             Value::Name(n) => write!(f, "Name({:?})", n),
@@ -126,6 +132,7 @@ impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Value::Nil => write!(f, "()"),
+            Value::Error(err) => write!(f, "Error {}", err),
             Value::Number(n) => write!(f, "{}", n),
             Value::String(string) => write!(f, r#""{}""#, string),
             Value::Name(name) => write!(f, "<{}>", name),

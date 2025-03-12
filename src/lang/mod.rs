@@ -24,8 +24,9 @@ pub fn leval(expr: value::Value, scopes: &mut scopes::Scopes) -> value::Value {
                 }
             }
             _ => panic!(
-                "Can't eval this list: {}",
-                pair!((*action).clone(), (*args).clone())
+                "Can't eval this list: {}\nscopes: {:?}",
+                pair!((*action).clone(), (*args).clone()),
+                scopes
             ),
         },
         _ => expr,

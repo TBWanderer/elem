@@ -84,7 +84,17 @@ pub fn llambda(list: Value, _scopes: &mut Scopes) -> Value {
             }
         }
 
-        let result = leval(body.clone(), eval_scopes);
+        let actions: Vec<Value> = body.clone().into();
+        let result = if actions.is_empty() {
+            Value::Nil
+        } else {
+            actions.iter().take(actions.len() - 1).for_each(|action| {
+                leval(action.clone(), eval_scopes);
+            });
+
+            leval(actions.last().unwrap().clone(), eval_scopes)
+        };
+
         eval_scopes.pop();
         result
     }))

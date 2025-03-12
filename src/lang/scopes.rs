@@ -2,6 +2,7 @@ use super::value::Value;
 use std::collections::HashMap;
 
 pub type Scope = HashMap<String, Value>;
+#[derive(Debug)]
 pub struct Scopes {
     pub inner: Vec<Scope>,
 }

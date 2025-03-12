@@ -162,7 +162,16 @@ pub fn run_code(code: String, scopes: &mut crate::lang::scopes::Scopes) {
     use crate::lang;
     use std::process;
 
+    if code.trim().is_empty() {
+        return;
+    }
+
     let tokens = tokenize(&code);
+
+    if tokens.is_empty() {
+        return;
+    }
+
     let values = parse(tokens);
 
     for value in values {

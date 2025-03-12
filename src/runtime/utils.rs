@@ -1,7 +1,7 @@
 pub mod io {
     pub fn input(prompt: &str) -> String {
         use std::io::{self, BufRead, Write};
-        print!("{} {}", "[>]", prompt);
+        print!("{}", prompt);
         match io::stdout().flush() {
             Ok(_) => (),
             Err(_) => panic!(),
@@ -159,10 +159,17 @@ pub fn parse(tokens: Vec<String>) -> Vec<crate::lang::value::Value> {
 }
 
 pub fn run_code(code: String, scopes: &mut crate::lang::scopes::Scopes) {
+    use crate::lang;
+    use std::process;
+
     let tokens = tokenize(&code);
     let values = parse(tokens);
 
     for value in values {
-        crate::lang::leval(value, scopes);
+        let result = lang::leval(value.clone(), scopes);
+        if let lang::value::Value::Error(err) = result {
+            println!("Error in value: {}\n{}", value, err);
+            process::exit(1);
+        }
     }
 }

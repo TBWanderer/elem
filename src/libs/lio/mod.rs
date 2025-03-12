@@ -11,5 +11,6 @@ pub fn init() -> Library {
     Library::from([
         (key("write"), fun(Rc::new(functions::lwrite))),
         (key("print"), fun(Rc::new(functions::lprint))),
+        (key("read"), fun(Rc::new(functions::lread))),
     ])
 }

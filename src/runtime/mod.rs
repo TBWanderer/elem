@@ -11,7 +11,6 @@ impl Runtime {
 
         let mut scopes = Scopes::new();
         scopes.add_scope(libs::lstd::init());
-        scopes.add_scope(libs::lio::init());
 
         Self { scopes }
     }

@@ -1,0 +1,3 @@
+; main.li
+(load "minilib.li")
+(print minilib::hello)

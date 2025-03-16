@@ -1,16 +1,29 @@
 use crate::lang::*;
 use crate::prelude::{parse, tokenize};
 
+use std::path::PathBuf;
+
 pub struct Runtime {
     scopes: Scopes,
 }
 
 impl Runtime {
-    pub fn new(parent_path: String) -> Self {
+    pub fn new(parent_path: Option<String>) -> Self {
+        let path: String = if parent_path.is_some() {
+            parent_path.unwrap().to_string()
+        } else {
+            PathBuf::from(".")
+                .canonicalize()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .to_string()
+        };
+
         let mut scopes = Scopes::new();
         scopes.init_scope();
 
-        scopes.change("__parent_path__".into(), Value::String(parent_path));
+        scopes.change("__parent_path__".into(), Value::String(path));
 
         scopes.init_scope();
         if let Value::Struct(std_lib) = crate::libs::lstd::init() {

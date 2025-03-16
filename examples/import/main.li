@@ -1,0 +1,6 @@
+(import "io")
+
+(io print "I am in base module")
+
+(import "testmodule")
+(io print (testmodule eval testvar))

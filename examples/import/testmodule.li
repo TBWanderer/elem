@@ -1,0 +1,5 @@
+(import "io")
+
+(io print "Now I am inside testmodule")
+(set testvar "test_value")
+(pub testvar)

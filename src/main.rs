@@ -1,7 +1,33 @@
+use clap::{value_parser, Arg, Command};
+use elem_lit::prelude::Runtime;
+use elem_lit::utils::*;
+use std::path::PathBuf;
+
 fn main() {
-    let input = r#"(import "io") (io print 123)"#;
-    let cur_path = std::path::PathBuf::from(".");
-    let abs_path = std::fs::canonicalize(cur_path).unwrap();
-    let mut runtime = elem_lit::prelude::Runtime::new(abs_path.to_string_lossy().to_string());
-    runtime.run(input)
+    let matches = Command::new("elem-lit")
+        .version("0.1.0")
+        .about("Interpreter for ELEM Lithium lang")
+        .arg(Arg::new("file").value_parser(value_parser!(PathBuf)))
+        .get_matches();
+
+    match matches.get_one::<PathBuf>("file") {
+        Some(path) => run_file(path.to_path_buf()),
+        None => repl(),
+    }
+}
+
+fn repl() {
+    let mut runtime = Runtime::new(None);
+
+    loop {
+        let line = input("repl@lit: ");
+        runtime.run(&line);
+    }
+}
+
+fn run_file(path: PathBuf) {
+    let mut runtime = Runtime::new(Some(path.parent().unwrap().to_str().unwrap().to_string()));
+
+    let code = code_from_file(&path);
+    runtime.run(&code);
 }

@@ -1,47 +1,48 @@
-use crate::lang::{scopes::Scopes, value::*};
+use super::{Scopes, Value};
 
 pub fn lwrite(args: Value, _scopes: &mut Scopes) -> Value {
-    use crate::nil;
+    let args: Vec<Value> = args.into();
 
     if args.len() > 1 {
         return Value::Error(
             "<func> write: Incorrect count of arguments! Expected less than 2 args".to_string(),
         );
     } else if args.len() == 1 {
-        print!("{}", args.get(0).show())
+        print!("{}", args[0].show())
     }
 
-    nil!()
+    Value::Nil
 }
 
 pub fn lprint(args: Value, _scopes: &mut Scopes) -> Value {
-    use crate::nil;
+    let args: Vec<Value> = args.into();
 
     if args.len() > 1 {
         return Value::Error(
             "<func> print: Incorrect count of arguments! Expected less than 2 args".to_string(),
         );
     } else if args.len() == 1 {
-        let arg = args.get(0);
-        if let Value::Error(err) = arg {
+        if let Value::Error(err) = &args[0] {
             return Value::Error(format!("<func> print: catched error in argument\n{}", err));
         } else {
-            println!("{}", arg.show())
+            println!("{}", args[0].show())
         }
     } else {
         println!()
     }
 
-    nil!()
+    Value::Nil
 }
 
 pub fn lread(args: Value, _scopes: &mut Scopes) -> Value {
+    let args: Vec<Value> = args.into();
+
     if args.len() != 0 {
         return Value::Error(
             "<func> read: Incorrect count of arguments! Expected 0 args".to_string(),
         );
     }
 
-    let input = crate::runtime::utils::io::input("");
+    let input = crate::utils::input("");
     Value::String(input)
 }

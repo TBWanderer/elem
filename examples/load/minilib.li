@@ -1,3 +1,0 @@
-; minilib.li
-(load "io")
-(set hello "aboba")

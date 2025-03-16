@@ -1,9 +1,10 @@
-mod lio;
+pub mod lio;
 pub mod lstd;
 
-type Library = crate::lang::scopes::Scope;
-
+use crate::lang::Value;
 use std::collections::HashMap;
-pub fn builtins() -> HashMap<String, Library> {
-    HashMap::from([("io".to_string(), lio::init())])
+
+pub fn builtins() -> HashMap<String, Value> {
+    let key = |key: &str| key.to_string();
+    HashMap::from([(key("io"), lio::init())])
 }

@@ -1,16 +1,17 @@
 mod functions;
 
-use super::Library;
-use crate::lang::value::Value;
+use crate::lang::{Scopes, Value};
 use std::rc::Rc;
 
-pub fn init() -> Library {
-    let key = |name| String::from(name);
-    let fun = |function| Value::Function(function);
-    let _mac = |macros| Value::Macros(macros);
-    Library::from([
+type Struct = std::collections::HashMap<String, Value>;
+
+pub fn init() -> Value {
+    let key = |key_name: &str| String::from(key_name);
+    let fun = |lfun| Value::Function(lfun);
+    let _mac = |lmac| Value::Macro(lmac);
+    Value::Struct(Struct::from([
         (key("write"), fun(Rc::new(functions::lwrite))),
         (key("print"), fun(Rc::new(functions::lprint))),
         (key("read"), fun(Rc::new(functions::lread))),
-    ])
+    ]))
 }

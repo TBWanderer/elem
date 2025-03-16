@@ -1,0 +1,10 @@
+(import "io")
+
+(io print "Hello world!")
+(set answer (io read))
+(io write answer)
+(io write "\n")
+
+(io write "Greet me too: ")
+(set answer (io read))
+(io print "Thanks =)")

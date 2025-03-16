@@ -13,6 +13,7 @@ pub fn init() -> Value {
     Value::Struct(Struct::from([
         (key("pub"), mac(Rc::new(macros::lpub))),
         (key("set"), mac(Rc::new(macros::lset))),
+        (key("eval"), mac(Rc::new(macros::leval))),
         (key("import"), fun(Rc::new(functions::limport))),
     ]))
 }

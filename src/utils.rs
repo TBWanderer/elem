@@ -28,7 +28,6 @@ pub fn code_from_file(path: &dyn AsRef<std::path::Path>) -> String {
         if !path.is_dir() {
             let data = std::fs::read_to_string(&path)
                 .expect(&format!("Couldn't read file: {}", path.to_str().unwrap()));
-
             let processed_data = data
                 .lines()
                 .map(|line| line.split(';').collect::<Vec<&str>>()[0].trim())

@@ -34,9 +34,9 @@ pub fn limport(args: Value, scopes: &mut Scopes) -> Value {
                         ));
                     }
                 } else if file_path.exists() {
-                    let code = utils::read_to_string(&file_path).unwrap();
+                    let code = utils::code_from_file(&file_path);
                     let mut runtime =
-                        Runtime::new(file_path.parent().unwrap().to_str().unwrap().into());
+                        Runtime::new(Some(file_path.parent().unwrap().to_str().unwrap().into()));
                     runtime.run(&code);
                     scopes.change(module, Value::Struct(runtime.get_public()))
                 } else {
@@ -45,7 +45,7 @@ pub fn limport(args: Value, scopes: &mut Scopes) -> Value {
                         // TODO
                     } else {
                         return Value::Error(format!(
-                            "<func> import: FileNotFoundError - given path ({}) of module not found", module_as_path.to_str().unwrap()
+                            "<func> import: FileNotFoundError - given path ('{}' and '{}') of module not found", module_as_path.to_str().unwrap(), file_path.to_str().unwrap()
                         ));
                     }
                 }

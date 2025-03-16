@@ -1,4 +1,10 @@
 use super::{Scopes, Value};
+use crate::lang::eval;
+
+pub fn leval(args: Value, scopes: &mut Scopes) -> Value {
+    let args: Vec<Value> = args.into();
+    eval(args[0].clone(), scopes)
+}
 
 pub fn lset(args: Value, scopes: &mut Scopes) -> Value {
     let args: Vec<Value> = args.into();
@@ -7,7 +13,8 @@ pub fn lset(args: Value, scopes: &mut Scopes) -> Value {
     }
 
     if let Value::Name(name) = &args[0] {
-        scopes.change(name.into(), args[1].clone());
+        let value = eval(args[1].clone(), scopes);
+        scopes.change(name.into(), value);
     } else {
         return Value::Error("<macro> set: TypeError".to_string());
     }

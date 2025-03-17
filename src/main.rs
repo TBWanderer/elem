@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 fn main() {
     let matches = Command::new("elem-lit")
-        .version("0.1.0")
+        .version("0.2.0")
         .about("Interpreter for ELEM Lithium lang")
         .arg(Arg::new("file").value_parser(value_parser!(PathBuf)))
         .get_matches();

@@ -1,9 +1,11 @@
 use crate::{prelude::*, utils};
 use std::path::PathBuf;
 
-pub fn limport(args: Value, scopes: &mut Scopes) -> Value {
-    let args: Vec<Value> = args.into();
+pub fn llist(args: Vec<Value>, _scopes: &mut Scopes) -> Value {
+    Value::Array(args)
+}
 
+pub fn limport(args: Vec<Value>, scopes: &mut Scopes) -> Value {
     for arg in args {
         if let Value::String(module) = arg {
             let builtins = crate::libs::builtins();

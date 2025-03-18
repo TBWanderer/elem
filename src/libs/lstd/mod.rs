@@ -15,5 +15,6 @@ pub fn init() -> Value {
         (key("set"), mac(Rc::new(macros::lset))),
         (key("eval"), mac(Rc::new(macros::leval))),
         (key("import"), fun(Rc::new(functions::limport))),
+        (key("list"), fun(Rc::new(functions::llist))),
     ]))
 }

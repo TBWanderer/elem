@@ -9,29 +9,29 @@ pub enum Value {
     Error(String),
     Name(String),
     Number(i128),
+    Byte(u8),
     String(String),
     Pair(Rc<Value>, Rc<Value>),
-    Function(Rc<dyn Fn(Value, &mut Scopes) -> Value>),
-    Macro(Rc<dyn Fn(Value, &mut Scopes) -> Value>),
+    Function(Rc<dyn Fn(Vec<Value>, &mut Scopes) -> Value>),
+    Macro(Rc<dyn Fn(Vec<Value>, &mut Scopes) -> Value>),
     Struct(HashMap<String, Value>),
+    Array(Vec<Value>),
 }
 
 pub fn eval(value: Value, scopes: &mut Scopes) -> Value {
     match value {
         Value::Name(name) => scopes.get(name),
         Value::Pair(car, cdr) => match eval((*car).clone(), scopes) {
-            Value::Macro(lmacro) => lmacro((*cdr).clone(), scopes),
+            Value::Macro(lmacro) => lmacro((*cdr).clone().into(), scopes),
             Value::Function(lfunc) => {
                 if !(*cdr).is_list() {
                     Value::Error(format!("<sys> eval: TypeError - this is not list: {}", cdr))
                 } else {
                     let args_vec: Vec<Value> = (*cdr).clone().into();
-                    let evaluated_args = Value::from(
-                        args_vec
-                            .into_iter()
-                            .map(|x| eval(x, scopes))
-                            .collect::<Vec<Value>>(),
-                    );
+                    let evaluated_args = args_vec
+                        .into_iter()
+                        .map(|x| eval(x, scopes))
+                        .collect::<Vec<Value>>();
                     lfunc(evaluated_args, scopes)
                 }
             }
@@ -48,6 +48,47 @@ pub fn eval(value: Value, scopes: &mut Scopes) -> Value {
 
                         any_other
                     }
+                }
+            }
+            Value::Array(array) => {
+                let args_vec: Vec<Value> = (*cdr).clone().into();
+                if args_vec.len() == 1 {
+                    match eval(args_vec[0].clone(), scopes) {
+                        Value::Number(idx) => {
+                            if idx < 0 || idx as usize >= array.len() {
+                                Value::Error(format!("<sys> eval: IndexError - index {} out of bounds for array of length {}", idx, array.len()))
+                            } else {
+                                array[idx as usize].clone()
+                            }
+                        }
+                        _ => Value::Error(
+                            "<sys> eval: TypeError - array index must be a number".to_string(),
+                        ),
+                    }
+                } else if args_vec.len() == 2 {
+                    match (
+                        eval(args_vec[0].clone(), scopes),
+                        eval(args_vec[1].clone(), scopes),
+                    ) {
+                        (Value::Number(start), Value::Number(end)) => {
+                            let start = start as usize;
+                            let end = end as usize;
+                            if start >= array.len() || end > array.len() || start > end {
+                                Value::Error(format!("<sys> eval: IndexError - invalid slice [{}:{}] for array of length {}", start, end, array.len()))
+                            } else {
+                                Value::Array(array[start..end].to_vec())
+                            }
+                        }
+                        _ => Value::Error(
+                            "<sys> eval: TypeError - array slice bounds must be numbers"
+                                .to_string(),
+                        ),
+                    }
+                } else {
+                    Value::Error(
+                        "<sys> eval: SyntaxError - array access requires 1 or 2 arguments"
+                            .to_string(),
+                    )
                 }
             }
             _ => Value::Error(format!(
@@ -83,6 +124,7 @@ impl std::fmt::Display for Value {
             Value::Nil => write!(f, "()"),
             Value::Error(err) => write!(f, "Error {}", err),
             Value::Number(n) => write!(f, "{}", n),
+            Value::Byte(byte) => write!(f, "{}", byte),
             Value::String(string) => write!(f, r#""{}""#, string),
             Value::Name(name) => write!(f, "<{}>", name),
             Value::Function(_) => write!(f, "<function>"),
@@ -103,6 +145,16 @@ impl std::fmt::Display for Value {
                 }
             }
             Value::Struct(_) => write!(f, "<struct>"),
+            Value::Array(array) => {
+                write!(f, "[")?;
+                if let Some((first, rest)) = array.split_first() {
+                    write!(f, "{}", first)?;
+                    for item in rest {
+                        write!(f, ", {}", item)?;
+                    }
+                }
+                write!(f, "]")
+            }
         }
     }
 }
@@ -113,12 +165,14 @@ impl std::fmt::Debug for Value {
             Value::Nil => write!(f, "Nil"),
             Value::Error(err) => write!(f, "Error({:?})", err),
             Value::Number(n) => write!(f, "Number({})", n),
+            Value::Byte(byte) => write!(f, "Byte({})", byte),
             Value::String(s) => write!(f, "String({:?})", s),
             Value::Name(n) => write!(f, "Name({:?})", n),
             Value::Pair(car, cdr) => write!(f, "Pair({:?}, {:?})", car, cdr),
             Value::Function(_) => write!(f, "Function(...)"),
             Value::Macro(_) => write!(f, "Macro(...)"),
             Value::Struct(map) => write!(f, "Struct({:?})", map),
+            Value::Array(array) => write!(f, "Array({:?})", array),
         }
     }
 }

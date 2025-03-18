@@ -1,13 +1,11 @@
 use super::{Scopes, Value};
 use crate::lang::eval;
 
-pub fn leval(args: Value, scopes: &mut Scopes) -> Value {
-    let args: Vec<Value> = args.into();
+pub fn leval(args: Vec<Value>, scopes: &mut Scopes) -> Value {
     eval(args[0].clone(), scopes)
 }
 
-pub fn lset(args: Value, scopes: &mut Scopes) -> Value {
-    let args: Vec<Value> = args.into();
+pub fn lset(args: Vec<Value>, scopes: &mut Scopes) -> Value {
     if args.len() != 2 {
         return Value::Error("<macro> set: ArgsCountError - incorrect count of args".to_string());
     }
@@ -22,8 +20,7 @@ pub fn lset(args: Value, scopes: &mut Scopes) -> Value {
     Value::Nil
 }
 
-pub fn lpub(args: Value, scopes: &mut Scopes) -> Value {
-    let args: Vec<Value> = args.into();
+pub fn lpub(args: Vec<Value>, scopes: &mut Scopes) -> Value {
     for arg in args {
         if let Value::Name(name) = arg {
             match scopes.get(name.clone()) {

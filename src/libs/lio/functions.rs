@@ -1,8 +1,6 @@
 use super::{Scopes, Value};
 
-pub fn lwrite(args: Value, _scopes: &mut Scopes) -> Value {
-    let args: Vec<Value> = args.into();
-
+pub fn lwrite(args: Vec<Value>, _scopes: &mut Scopes) -> Value {
     if args.len() > 1 {
         return Value::Error(
             "<func> write: Incorrect count of arguments! Expected less than 2 args".to_string(),
@@ -14,9 +12,7 @@ pub fn lwrite(args: Value, _scopes: &mut Scopes) -> Value {
     Value::Nil
 }
 
-pub fn lprint(args: Value, _scopes: &mut Scopes) -> Value {
-    let args: Vec<Value> = args.into();
-
+pub fn lprint(args: Vec<Value>, _scopes: &mut Scopes) -> Value {
     if args.len() > 1 {
         return Value::Error(
             "<func> print: Incorrect count of arguments! Expected less than 2 args".to_string(),
@@ -34,9 +30,7 @@ pub fn lprint(args: Value, _scopes: &mut Scopes) -> Value {
     Value::Nil
 }
 
-pub fn lread(args: Value, _scopes: &mut Scopes) -> Value {
-    let args: Vec<Value> = args.into();
-
+pub fn lread(args: Vec<Value>, _scopes: &mut Scopes) -> Value {
     if args.len() != 0 {
         return Value::Error(
             "<func> read: Incorrect count of arguments! Expected 0 args".to_string(),

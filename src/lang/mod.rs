@@ -1,3 +1,8 @@
+pub mod error;
+mod eval;
+
+pub use eval::eval;
+
 mod scopes;
 pub use scopes::{Scope, Scopes};
 
@@ -16,89 +21,6 @@ pub enum Value {
     Macro(Rc<dyn Fn(Vec<Value>, &mut Scopes) -> Value>),
     Struct(HashMap<String, Value>),
     Array(Vec<Value>),
-}
-
-pub fn eval(value: Value, scopes: &mut Scopes) -> Value {
-    match value {
-        Value::Name(name) => scopes.get(name),
-        Value::Pair(car, cdr) => match eval((*car).clone(), scopes) {
-            Value::Macro(lmacro) => lmacro((*cdr).clone().into(), scopes),
-            Value::Function(lfunc) => {
-                if !(*cdr).is_list() {
-                    Value::Error(format!("<sys> eval: TypeError - this is not list: {}", cdr))
-                } else {
-                    let args_vec: Vec<Value> = (*cdr).clone().into();
-                    let evaluated_args = args_vec
-                        .into_iter()
-                        .map(|x| eval(x, scopes))
-                        .collect::<Vec<Value>>();
-                    lfunc(evaluated_args, scopes)
-                }
-            }
-            Value::Struct(structure) => {
-                scopes.init_scope();
-                scopes.change_from(structure);
-                match eval((*cdr).clone(), scopes) {
-                    Value::Error(err) => {
-                        Value::Error(format!("<sys> eval: catched Error\n{}", err))
-                    }
-                    any_other => {
-                        let updated_structure = scopes.pop().unwrap();
-                        scopes.change(car.to_string(), Value::Struct(updated_structure));
-
-                        any_other
-                    }
-                }
-            }
-            Value::Array(array) => {
-                let args_vec: Vec<Value> = (*cdr).clone().into();
-                if args_vec.len() == 1 {
-                    match eval(args_vec[0].clone(), scopes) {
-                        Value::Number(idx) => {
-                            if idx < 0 || idx as usize >= array.len() {
-                                Value::Error(format!("<sys> eval: IndexError - index {} out of bounds for array of length {}", idx, array.len()))
-                            } else {
-                                array[idx as usize].clone()
-                            }
-                        }
-                        _ => Value::Error(
-                            "<sys> eval: TypeError - array index must be a number".to_string(),
-                        ),
-                    }
-                } else if args_vec.len() == 2 {
-                    match (
-                        eval(args_vec[0].clone(), scopes),
-                        eval(args_vec[1].clone(), scopes),
-                    ) {
-                        (Value::Number(start), Value::Number(end)) => {
-                            let start = start as usize;
-                            let end = end as usize;
-                            if start >= array.len() || end > array.len() || start > end {
-                                Value::Error(format!("<sys> eval: IndexError - invalid slice [{}:{}] for array of length {}", start, end, array.len()))
-                            } else {
-                                Value::Array(array[start..end].to_vec())
-                            }
-                        }
-                        _ => Value::Error(
-                            "<sys> eval: TypeError - array slice bounds must be numbers"
-                                .to_string(),
-                        ),
-                    }
-                } else {
-                    Value::Error(
-                        "<sys> eval: SyntaxError - array access requires 1 or 2 arguments"
-                            .to_string(),
-                    )
-                }
-            }
-            _ => Value::Error(format!(
-                "<sys> eval: SyntaxError - can't eval this list: {}\nScopes: {:?}",
-                Value::Pair((*car).clone().into(), (*cdr).clone().into()),
-                scopes
-            )),
-        },
-        _ => value,
-    }
 }
 
 impl Value {

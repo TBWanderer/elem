@@ -48,7 +48,10 @@ impl Scopes {
                 return self.inner[i].get(&k).unwrap().clone();
             }
         }
-        Value::Error("<sys> get_var: KeyNotFoundError - name <{}> not found in module".to_string())
+        Value::Error(format!(
+            "<sys> get_var: KeyNotFoundError - name <{}> not found in module",
+            k
+        ))
     }
 
     pub fn exists(&mut self, k: String) -> bool {

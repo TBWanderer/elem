@@ -8,3 +8,10 @@
 (io write "Greet me too: ")
 (set answer (io read))
 (io print "Thanks =)")
+
+(set arr (array 1 2 3 4 5 6))
+(io print (arr 0 3))
+
+(io print (mul 1 2 3 4 (add 1 2 3 4 5 6)))
+
+(io read "Input test: ")

@@ -1,0 +1,6 @@
+(import "io" "fs")
+
+(set a (array 1 2 3 4))
+(io print (a 5))
+
+

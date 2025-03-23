@@ -1,3 +1,5 @@
+pub use ansi_term::Color;
+pub const COLOR_RESET: &str = "\u{1b}[0m";
 pub use std::{fs::read_to_string, process};
 
 pub fn input(prompt: &str) -> String {

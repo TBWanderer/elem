@@ -48,7 +48,7 @@ impl Runtime {
             match eval(value.clone(), &mut self.scopes) {
                 Value::Error(err) => {
                     println!(
-                        "<runtime> run: catched Error while evaluating value: {}\n{}",
+                        "[..] <runtime> run: catched Error while evaluating value: {}\n{}",
                         value, err
                     );
                     std::process::exit(1);

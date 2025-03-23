@@ -1,5 +1,9 @@
-use crate::{prelude::*, utils};
+use super::{super::error, Scopes, Value, LIB_NAME};
+use crate::{prelude::Runtime, utils};
+
 use std::path::PathBuf;
+
+const VALUE_TYPE: &str = "func";
 
 pub fn llist(args: Vec<Value>, _scopes: &mut Scopes) -> Value {
     Value::Array(args)
@@ -43,7 +47,7 @@ pub fn limport(args: Vec<Value>, scopes: &mut Scopes) -> Value {
                     scopes.change(module, Value::Struct(runtime.get_public()))
                 } else {
                     let module_as_path = PathBuf::from(&module);
-                    if module_as_path.is_absolute() {
+                    if module_as_path.is_absolute() && module_as_path.exists() {
                         // TODO
                     } else {
                         return Value::Error(format!(
@@ -58,4 +62,48 @@ pub fn limport(args: Vec<Value>, scopes: &mut Scopes) -> Value {
     }
 
     Value::Nil
+}
+
+pub fn ladd(args: Vec<Value>, _scopes: &mut Scopes) -> Value {
+    const FUNC_NAME: &str = "add";
+
+    let mut res = 0;
+
+    for arg in args {
+        if let Value::Number(num) = arg {
+            res += num;
+        } else {
+            return Value::Error(error::fmt(
+                LIB_NAME,
+                VALUE_TYPE,
+                FUNC_NAME,
+                "TypeError",
+                "expected Number type in arguments",
+            ));
+        }
+    }
+
+    Value::Number(res)
+}
+
+pub fn lmul(args: Vec<Value>, _scopes: &mut Scopes) -> Value {
+    const FUNC_NAME: &str = "mul";
+
+    let mut res = 1;
+
+    for arg in args {
+        if let Value::Number(num) = arg {
+            res *= num;
+        } else {
+            return Value::Error(error::fmt(
+                LIB_NAME,
+                VALUE_TYPE,
+                FUNC_NAME,
+                "TypeError",
+                "expected Number type in arguments",
+            ));
+        }
+    }
+
+    Value::Number(res)
 }

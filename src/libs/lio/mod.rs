@@ -5,6 +5,8 @@ use std::rc::Rc;
 
 type Struct = std::collections::HashMap<String, Value>;
 
+pub const LIB_NAME: &str = "io";
+
 pub fn init() -> Value {
     let key = |key_name: &str| String::from(key_name);
     let fun = |lfun| Value::Function(lfun);

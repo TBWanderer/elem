@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 fn main() {
     let matches = Command::new("elem-lit")
-        .version("0.2.0")
+        .version("0.2.1")
         .about("Interpreter for ELEM Lithium lang")
         .arg(Arg::new("file").value_parser(value_parser!(PathBuf)))
         .get_matches();
@@ -26,7 +26,12 @@ fn repl() {
 }
 
 fn run_file(path: PathBuf) {
-    let mut runtime = Runtime::new(Some(path.parent().unwrap().to_str().unwrap().to_string()));
+    let parent_path = path
+        .parent()
+        .map(|p| p.to_str().unwrap_or("."))
+        .unwrap_or(".")
+        .to_string();
+    let mut runtime = Runtime::new(Some(parent_path));
 
     let code = code_from_file(&path);
     runtime.run(&code);

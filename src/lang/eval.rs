@@ -5,7 +5,7 @@ pub fn eval(value: Value, scopes: &mut Scopes) -> Value {
     match value {
         Value::Name(name) => scopes.get(name),
         Value::Pair(car, cdr) => match eval((*car).clone(), scopes) {
-            Value::Macro(lmacro) => lmacro((*cdr).clone().into(), scopes),
+            Value::Macro(lmacro) => eval_macro(lmacro, (*cdr).clone().into(), scopes),
             Value::Function(lfunc) => eval_function(lfunc, (*cdr).clone().into(), scopes),
             Value::Struct(_) => eval_struct((*car).clone(), (*cdr).clone(), scopes),
             Value::Array(array) => eval_array(array, (*cdr).clone(), scopes),
@@ -51,7 +51,7 @@ fn eval_function(
 }
 
 fn eval_struct(lstruct: Value, args: Value, scopes: &mut Scopes) -> Value {
-    if let Value::Struct(structure) = &lstruct {
+    if let Value::Struct(structure) = eval(lstruct.clone(), scopes) {
         scopes.init_scope();
         scopes.change_from(structure.clone());
         match eval(args.clone(), scopes) {
@@ -62,12 +62,7 @@ fn eval_struct(lstruct: Value, args: Value, scopes: &mut Scopes) -> Value {
                 "CatchedError",
                 &format!("catched error\n{}", err),
             )),
-            any_other => {
-                let updated_structure = scopes.pop().unwrap();
-                scopes.change(lstruct.to_string(), Value::Struct(updated_structure));
-
-                any_other
-            }
+            any_other => any_other,
         }
     } else {
         Value::Nil

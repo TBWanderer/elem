@@ -1,6 +1,11 @@
 (import "io" "fs")
 
-(set a (array 1 2 3 4))
-(io print (a 5))
+(set data (fs read "test.dat"))
+
+(io print (data 0 5))
+(fs write "test-result.dat" (data 0 5))
+(io print 
+	"Listed current dir: \n"
+	(fs listdir "."))
 
 

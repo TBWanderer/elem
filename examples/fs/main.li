@@ -1,11 +1,44 @@
 (import "io" "fs")
 
-(set data (fs read "test.dat"))
+;; Read entire file
+(set file-data (fs read "data.bin"))
+(io print "First 5 bytes: " (file-data 0 5))
 
-(io print (data 0 5))
-(fs write "test-result.dat" (data 0 5))
-(io print 
-	"Listed current dir: \n"
-	(fs listdir "."))
+;; Write partial data to new file
+(fs write "partial.bin" (file-data 0 10))
 
+;; List directory contents
+(set dir-list (fs listdir "."))
+(io print "Current directory contents:" dir-list)
 
+;; Check file existence
+(io print "'data.bin' exists? " (fs exists "data.bin"))
+
+;; Create nested directories
+(fs mkdir "backups/2024/january" true)
+
+;; Copy file to backup
+(fs cp "data.bin" "backups/2024/january/data.bin")
+
+;; Get file info
+(set file-info (fs stat "data.bin"))
+(io print "File metadata: " file-info)
+
+;; Create symlink
+(fs symlink "data.bin" "data.link")
+
+;; Read symlink target
+(io print "Symlink target: " (fs readlink "data.link"))
+
+;; Move/rename file
+(fs mv "partial.bin" "processed.dat")
+
+;; Show current directory
+(io print "Working directory: " (fs pwd))
+
+;; Cleanup operations
+(fs rm "processed.dat")
+(fs rm "data.link")
+(fs rmdir "backups" true)
+
+(set result (fs read "nonexistent.txt"))

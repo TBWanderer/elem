@@ -19,10 +19,19 @@ fn main() {
 fn repl() {
     let mut runtime = Runtime::new(None);
 
-    loop {
-        let line = input("repl@lit: ");
-        runtime.run(&line);
-    }
+    let repl_code = r#"
+        (import "io")
+
+        (set repl (lambda () (
+            (set input (io read "repl@lit: "))
+            (io print (evals input))
+            (repl)
+        )))
+
+        (repl)
+    "#;
+
+    runtime.run(&repl_code);
 }
 
 fn run_file(path: PathBuf) {

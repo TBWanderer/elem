@@ -7,6 +7,12 @@ pub enum Token {
 }
 
 pub fn tokenize(line: &str) -> Vec<Token> {
+    let line = &line
+        .lines()
+        .map(|line| line.split(';').collect::<Vec<&str>>()[0].trim())
+        .collect::<Vec<&str>>()
+        .join(" ");
+
     let mut tokens = Vec::new();
     let mut current_string = String::new();
     let mut symbol_start: Option<usize> = None;

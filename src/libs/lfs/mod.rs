@@ -17,7 +17,7 @@ pub fn init() -> Value {
         (key("read"), fun(Rc::new(functions::lread))),
         (key("write"), fun(Rc::new(functions::lwrite))),
         // --- Directory operations ---
-        (key("listdir"), fun(Rc::new(functions::lls))),
+        (key("listdir"), fun(Rc::new(functions::llistdir))),
         (key("mkdir"), fun(Rc::new(functions::lmkdir))),
         (key("rmdir"), fun(Rc::new(functions::lrmdir))),
         // --- File operations ---

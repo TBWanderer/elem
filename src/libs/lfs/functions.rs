@@ -115,7 +115,7 @@ pub fn lwrite(args: Vec<Value>, _scopes: &mut Scopes) -> Value {
 }
 
 /// List contents of a directory
-pub fn lls(args: Vec<Value>, _scopes: &mut Scopes) -> Value {
+pub fn llistdir(args: Vec<Value>, _scopes: &mut Scopes) -> Value {
     const FUNC_NAME: &str = "ls";
 
     if args.len() != 1 {
